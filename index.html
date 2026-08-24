@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FAFAF7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cut &amp; Build">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Cut &amp; Build — 3-Day Program</title>
+<style>
+  :root{
+    --paper:#FAFAF7;
+    --card:#FFFFFF;
+    --rule:#ECECE3;
+    --ink:#22303F;
+    --ink-soft:#66707D;
+    --ink-faint:#9AA2AC;
+    --hi:#FFD84D;
+    --hi-soft:#FFF4C8;
+    --line:#DDDED4;
+    --good:#2F7D4F;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+  }
+  .mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace}
+
+  /* ---------- header ---------- */
+  header{
+    padding:calc(20px + env(safe-area-inset-top)) 16px 12px;
+    max-width:560px;margin:0 auto;
+  }
+  .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-soft);
+  }
+  h1{font-size:28px;font-weight:800;letter-spacing:-.01em;margin-top:2px}
+  h1 .accent{
+    background:linear-gradient(transparent 55%, var(--hi) 55%, var(--hi) 92%, transparent 92%);
+  }
+  .sub{font-size:13px;color:var(--ink-soft);margin-top:4px}
+
+  /* ---------- tabs ---------- */
+  .tabs{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    padding:10px 16px;
+    border-bottom:1px solid var(--rule);
+  }
+  .tabs-inner{
+    max-width:560px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:7px;
+  }
+  .tab{
+    appearance:none;border:1.5px solid var(--ink);
+    background:var(--card);color:var(--ink);
+    border-radius:10px;padding:9px 2px;
+    font-size:13.5px;font-weight:700;cursor:pointer;
+    position:relative;
+    transition:background .15s,color .15s;
+  }
+  .tab[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+  .tab .dot{
+    position:absolute;top:5px;right:7px;width:7px;height:7px;border-radius:50%;
+    background:var(--hi);border:1px solid var(--ink);display:none;
+  }
+  .tab.suggested .dot{display:block}
+  .tab small{display:block;font-size:9.5px;font-weight:600;opacity:.75;margin-top:1px;min-height:12px}
+
+  /* ---------- workout list ---------- */
+  main{max-width:560px;margin:0 auto;padding:14px 16px}
+  .day-note{font-size:12.5px;color:var(--ink-soft);padding:2px 2px 12px}
+  .card{
+    background:
+      repeating-linear-gradient(180deg,transparent 0 27px,var(--rule) 27px 28px),
+      var(--card);
+    border:1px solid #E3E4DB;
+    border-radius:var(--radius);
+    padding:16px 16px 14px;
+    margin-bottom:14px;
+  }
+  .ex-head{display:flex;align-items:baseline;gap:10px}
+  .ex-num{font-size:12px;font-weight:800;color:var(--ink-soft);min-width:22px}
+  .ex-name{font-size:18px;font-weight:800;letter-spacing:-.01em}
+  .ex-count{font-size:15px;font-weight:700;margin:6px 0 2px 32px}
+  .ex-count .x{color:var(--ink-faint);font-weight:600;padding:0 2px}
+  .fig{display:flex;justify-content:center;padding:6px 0 2px}
+  .fig svg{width:200px;height:150px}
+  .cue{
+    font-size:13px;line-height:1.45;color:var(--ink-soft);
+    margin:2px 0 12px;text-align:center;padding:0 6px;
+  }
+  .cue a{
+    color:var(--ink);font-weight:700;text-decoration:none;
+    border-bottom:2px solid var(--hi);white-space:nowrap;
+  }
+  .track{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;border-top:1px dashed var(--line);padding-top:12px;
+  }
+  .bubbles{display:flex;gap:10px}
+  .bubble{
+    appearance:none;width:38px;height:38px;border-radius:50%;
+    border:2px solid var(--ink);background:var(--card);
+    font-size:15px;font-weight:800;color:var(--ink-faint);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:transform .12s,background .12s,color .12s;
+  }
+  .bubble[aria-pressed="true"]{background:var(--hi);color:var(--ink);transform:scale(1.06)}
+  .weight{display:flex;align-items:baseline;gap:5px}
+  .weight input{
+    width:64px;border:none;border-bottom:2px solid var(--ink);
+    background:transparent;font-size:16px;font-weight:700;
+    text-align:center;padding:4px 2px;color:var(--ink);border-radius:0;
+  }
+  .weight input::placeholder{color:var(--ink-faint);font-weight:500}
+  .weight input:focus{outline:none;border-bottom-color:var(--hi);box-shadow:0 2px 0 var(--hi)}
+  .unit-btn{
+    appearance:none;border:none;background:none;
+    font-size:12px;font-weight:700;color:var(--ink-soft);
+    cursor:pointer;padding:4px 2px;border-bottom:1px dotted var(--ink-faint);
+  }
+
+  .finish{
+    appearance:none;width:100%;
+    border:2px solid var(--ink);border-radius:12px;
+    background:var(--ink);color:var(--paper);
+    font-size:16px;font-weight:800;padding:15px;
+    cursor:pointer;margin:6px 0 16px;
+    transition:transform .1s;
+  }
+  .finish:active{transform:scale(.985)}
+  .rules{
+    font-size:12px;color:var(--ink-faint);text-align:center;
+    line-height:1.6;padding:4px 8px 12px;
+  }
+
+  /* ---------- stats pane ---------- */
+  .stat-title{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-soft);margin-bottom:10px}
+  .bw-now{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .bw-num{font-size:36px;font-weight:800}
+  .bw-delta{font-size:14px;font-weight:700}
+  .bw-delta.down{color:var(--good)}
+  .bw-delta.up{color:#B4532A}
+  .bw-chart{width:100%;height:84px;margin-top:8px}
+  .bw-add{display:flex;gap:10px;align-items:center;margin-top:12px;
+    border-top:1px dashed var(--line);padding-top:12px}
+  .bw-add input{
+    flex:0 0 90px;border:none;border-bottom:2px solid var(--ink);background:transparent;
+    font-size:16px;font-weight:700;text-align:center;padding:4px 2px;color:var(--ink);border-radius:0;
+  }
+  .bw-add input:focus{outline:none;border-bottom-color:var(--hi)}
+  .btn-small{
+    appearance:none;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);
+    border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;
+  }
+  .btn-small.primary{background:var(--ink);color:var(--paper)}
+  .str-row{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 0;border-bottom:1px dashed var(--line);
+  }
+  .str-row:last-child{border-bottom:none}
+  .str-name{flex:1;font-size:13.5px;font-weight:700;line-height:1.25}
+  .str-vals{font-size:12.5px;font-weight:700;white-space:nowrap}
+  .str-delta{font-size:11.5px;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap}
+  .str-delta.pos{background:var(--hi-soft);color:var(--ink)}
+  .str-delta.zero{background:#EFEFE8;color:var(--ink-soft)}
+  .log-row{
+    display:flex;justify-content:space-between;gap:10px;
+    font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line);
+  }
+  .log-row:last-child{border-bottom:none}
+  .log-row b{font-weight:800}
+  .log-row span{color:var(--ink-soft)}
+  .empty{font-size:13px;color:var(--ink-faint);line-height:1.5}
+  .data-btns{display:flex;gap:10px;justify-content:center;padding:2px 0 12px}
+
+  .stats-line{
+    text-align:center;font-size:13px;color:var(--ink-soft);
+    line-height:1.7;padding-bottom:8px;
+  }
+  .stats-line b{color:var(--ink)}
+  .danger{
+    display:block;margin:0 auto;appearance:none;border:none;background:none;
+    font-size:12px;color:var(--ink-faint);text-decoration:underline;cursor:pointer;padding:8px;
+  }
+  .save-note{font-size:11px;color:var(--ink-faint);text-align:center;padding-bottom:10px}
+
+  /* ---------- rest timer ---------- */
+  .timer{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:var(--ink);color:var(--paper);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+    display:none;align-items:center;justify-content:space-between;cursor:pointer;
+  }
+  .timer.on{display:flex}
+  .timer .t-label{font-size:13px;font-weight:600;opacity:.8}
+  .timer .t-time{font-size:22px;font-weight:800}
+  .timer .t-bar{position:absolute;top:0;left:0;height:3px;background:var(--hi);width:100%;transition:width 1s linear}
+  .timer .t-skip{font-size:12px;opacity:.7}
+
+  .toast{
+    position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--paper);
+    font-size:14px;font-weight:700;padding:12px 20px;border-radius:99px;
+    opacity:0;pointer-events:none;z-index:40;
+    transition:opacity .25s,transform .25s;max-width:86vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  :where(button,input,a):focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Ahmed's program card</div>
+  <h1>Cut <span class="accent">&amp; Build</span></h1>
+  <div class="sub">3 days a week · full body · extra chest, biceps &amp; triceps</div>
+</header>
+
+<div class="tabs">
+  <div class="tabs-inner" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="tabbtn-0" aria-selected="true"><span class="dot"></span>Day 1<small id="tabprog-0"></small></button>
+    <button class="tab" role="tab" id="tabbtn-1" aria-selected="false"><span class="dot"></span>Day 2<small id="tabprog-1"></small></button>
+    <button class="tab" role="tab" id="tabbtn-2" aria-selected="false"><span class="dot"></span>Day 3<small id="tabprog-2"></small></button>
+    <button class="tab" role="tab" id="tabbtn-3" aria-selected="false">Stats<small>progress</small></button>
+  </div>
+</div>
+
+<main>
+  <!-- workout view -->
+  <div id="workoutPane">
+    <div class="day-note" id="dayNote"></div>
+    <div id="list"></div>
+    <button class="finish" id="finishBtn">Finish workout</button>
+    <div class="stats-line" id="quickStats"></div>
+    <div class="rules">Rest 60–90 sec between sets · rest day between workouts<br>When all sets feel easy, add a little weight next time.</div>
+  </div>
+
+  <!-- stats view -->
+  <div id="statsPane" hidden>
+    <section class="card">
+      <div class="stat-title">Body weight</div>
+      <div id="bwBody"></div>
+      <div class="bw-add">
+        <input type="text" inputmode="decimal" id="bwInput" placeholder="—" aria-label="Body weight">
+        <span class="mono" style="font-size:13px;font-weight:700" id="bwUnit">lb</span>
+        <button class="btn-small primary" id="bwAddBtn">Log today</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="stat-title">Strength — first vs. latest</div>
+      <div id="strBody"></div>
+    </section>
+
+    <section class="card">
+      <div class="stat-title">Workout log</div>
+      <div id="logBody"></div>
+    </section>
+
+    <div class="data-btns">
+      <button class="btn-small" id="exportBtn">Export backup</button>
+      <button class="btn-small" id="importBtn">Import</button>
+    </div>
+    <div class="save-note" id="saveNote"></div>
+    <button class="danger" id="resetBtn">Clear all saved progress</button>
+  </div>
+</main>
+
+<div class="timer" id="timer" title="Tap to dismiss">
+  <div class="t-bar" id="timerBar"></div>
+  <span class="t-label">Rest</span>
+  <span class="t-time mono" id="timerTime">1:30</span>
+  <span class="t-skip">tap to skip</span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ exercise illustrations (line art) ============ */
+const S = (inner) => `<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <g fill="none" stroke="#22303F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${inner}</g></svg>`;
+const G = `<line x1="12" y1="82" x2="108" y2="82" stroke="#C9CBBD" stroke-width="2"/>`;
+const Y = 'fill="#FFD84D" stroke="#22303F" stroke-width="2.5"';
+
+const ART = {
+  goblet: S(G+`
+    <circle cx="57" cy="24" r="6"/>
+    <path d="M56 30 L50 50"/>
+    <path d="M50 50 L66 54 L64 81"/>
+    <path d="M64 81 L74 81"/>
+    <path d="M54 34 L64 41"/>
+    <circle cx="68" cy="40" r="6" ${Y}/>`),
+  legpress: S(G+`
+    <path d="M24 81 L52 81"/>
+    <path d="M30 79 L44 54"/>
+    <circle cx="49" cy="48" r="6"/>
+    <path d="M47 54 L50 68"/>
+    <path d="M50 68 L72 56 L88 46"/>
+    <path d="M92 32 L100 56" ${Y} stroke-width="6"/>
+    <path d="M96 24 L104 62" stroke="#9AA2AC" stroke-width="2"/>`),
+  bench: S(G+`
+    <path d="M30 64 L86 64"/><path d="M38 64 L38 81"/><path d="M78 64 L78 81"/>
+    <circle cx="33" cy="56" r="6"/>
+    <path d="M40 60 L72 60"/>
+    <path d="M72 60 L83 68 L83 81"/>
+    <path d="M52 60 L52 42"/><path d="M62 60 L62 40"/>
+    <circle cx="52" cy="37" r="5.5" ${Y}/><circle cx="62" cy="35" r="5.5" ${Y}/>`),
+  pulldown: S(G+`
+    <path d="M60 6 L60 16" stroke="#9AA2AC" stroke-width="2"/>
+    <path d="M38 18 L82 18" ${Y} stroke-width="5"/>
+    <path d="M41 20 L51 36"/><path d="M79 20 L69 36"/>
+    <circle cx="60" cy="31" r="6"/>
+    <path d="M60 37 L60 58"/>
+    <path d="M60 58 L74 61 L74 81"/>
+    <path d="M46 67 L78 67" stroke="#9AA2AC" stroke-width="2"/>`),
+  row: S(G+`
+    <circle cx="52" cy="32" r="6"/>
+    <path d="M53 38 L55 62"/>
+    <path d="M55 62 L88 60"/>
+    <path d="M88 52 L90 68" stroke="#9AA2AC" stroke-width="2"/>
+    <path d="M54 44 L72 52"/>
+    <path d="M75 49 L75 57" ${Y} stroke-width="6"/>
+    <path d="M78 53 L102 53" stroke="#9AA2AC" stroke-width="2"/>`),
+  shoulderpress: S(G+`
+    <path d="M46 81 L46 50" stroke="#9AA2AC" stroke-width="2"/>
+    <circle cx="57" cy="27" r="6"/>
+    <path d="M57 33 L57 58"/>
+    <path d="M53 36 L46 23"/><path d="M61 36 L68 23"/>
+    <circle cx="45" cy="18" r="5.5" ${Y}/><circle cx="69" cy="18" r="5.5" ${Y}/>
+    <path d="M57 58 L73 61 L73 81"/>`),
+  rdl: S(G+`
+    <path d="M60 81 L58 52"/>
+    <path d="M58 52 L82 38"/>
+    <circle cx="88" cy="35" r="6"/>
+    <path d="M72 44 L70 60"/><path d="M78 41 L76 58"/>
+    <circle cx="70" cy="65" r="5.5" ${Y}/><circle cx="76" cy="63" r="5.5" ${Y}/>`),
+  lunge: S(G+`
+    <circle cx="60" cy="22" r="6"/>
+    <path d="M60 28 L58 50"/>
+    <path d="M58 50 L75 61 L77 81"/>
+    <path d="M58 50 L46 68 L34 77"/>
+    <path d="M57 33 L55 52"/><circle cx="55" cy="57" r="5" ${Y}/>
+    <path d="M63 33 L66 52"/><circle cx="66" cy="57" r="5" ${Y}/>`),
+  plank: S(G+`
+    <circle cx="29" cy="57" r="6"/>
+    <path d="M36 61 L92 72"/>
+    <path d="M92 72 L100 80"/>
+    <path d="M38 62 L36 76"/><path d="M36 76 L50 76"/>`),
+  incline: S(G+`
+    <path d="M40 76 L68 44" stroke="#9AA2AC" stroke-width="2"/>
+    <path d="M40 76 L40 81"/><path d="M60 53 L66 81" stroke="#9AA2AC" stroke-width="2"/>
+    <circle cx="72" cy="38" r="6"/>
+    <path d="M46 70 L66 47"/>
+    <path d="M58 56 L68 34"/><circle cx="70" cy="29" r="5.5" ${Y}/>
+    <path d="M52 63 L62 41"/><circle cx="64" cy="36" r="5.5" ${Y}/>
+    <path d="M46 70 L50 81"/>`),
+  pecdeck: S(G+`
+    <circle cx="60" cy="20" r="6"/>
+    <path d="M60 26 L60 56"/>
+    <path d="M48 64 L72 64" stroke="#9AA2AC" stroke-width="2"/>
+    <path d="M60 33 L44 31 L44 14"/>
+    <path d="M60 33 L76 31 L76 14"/>
+    <path d="M38 12 L38 34" ${Y} stroke-width="6"/>
+    <path d="M82 12 L82 34" ${Y} stroke-width="6"/>
+    <path d="M60 56 L52 81"/><path d="M60 56 L68 81"/>`),
+  curl: S(G+`
+    <circle cx="58" cy="24" r="6"/>
+    <path d="M58 30 L58 54"/>
+    <path d="M58 54 L54 81"/><path d="M58 54 L64 81"/>
+    <path d="M56 34 L53 55"/>
+    <path d="M60 34 L68 45 L71 31"/>
+    <circle cx="72" cy="26" r="5.5" ${Y}/>`),
+  hammer: S(G+`
+    <circle cx="60" cy="20" r="6"/>
+    <path d="M60 26 L60 54"/>
+    <path d="M60 54 L52 81"/><path d="M60 54 L68 81"/>
+    <path d="M55 30 L49 44 L46 33"/>
+    <path d="M65 30 L71 44 L74 33"/>
+    <rect x="42" y="20" width="7" height="13" rx="2" ${Y}/>
+    <rect x="71" y="20" width="7" height="13" rx="2" ${Y}/>`),
+  pushdown: S(G+`
+    <path d="M72 6 L72 24" stroke="#9AA2AC" stroke-width="2"/>
+    <path d="M72 24 L66 44" ${Y} stroke-width="4"/>
+    <path d="M72 24 L80 44" ${Y} stroke-width="4"/>
+    <circle cx="54" cy="24" r="6"/>
+    <path d="M54 30 L54 56"/>
+    <path d="M54 36 L62 42 L66 46"/>
+    <path d="M54 56 L50 81"/><path d="M54 56 L60 81"/>`),
+  overhead: S(G+`
+    <circle cx="60" cy="28" r="6"/>
+    <path d="M60 34 L60 58"/>
+    <path d="M60 58 L52 81"/><path d="M60 58 L68 81"/>
+    <path d="M55 36 L50 20 L56 12"/>
+    <path d="M65 36 L70 20 L64 12"/>
+    <rect x="52" y="5" width="16" height="7" rx="3" ${Y}/>`),
+};
+
+/* ============ program data ============ */
+const EX = {
+  goblet:      {name:"Goblet squat",              count:[3,"10"],       art:"goblet",
+    cue:"Hold one dumbbell at your chest, squat until thighs pass parallel, chest up."},
+  legpress:    {name:"Leg press",                 count:[3,"12"],       art:"legpress",
+    cue:"Feet shoulder-width on the plate, lower to ~90°, push back without locking knees."},
+  bench:       {name:"Dumbbell bench press",      count:[3,"10"],       art:"bench",
+    cue:"Lie flat, press the dumbbells over your chest, lower slowly to chest level."},
+  incline:     {name:"Incline dumbbell press",    count:[3,"10"],       art:"incline",
+    cue:"Bench at ~30°, press up — this builds the upper chest."},
+  pecdeck:     {name:"Chest fly machine",         count:[3,"12"],       art:"pecdeck",
+    cue:"Sit tall, squeeze the pads together in front of you, go slow on the way back."},
+  pulldown:    {name:"Lat pulldown",              count:[3,"10"],       art:"pulldown",
+    cue:"Grip wider than shoulders, pull the bar to your upper chest without leaning back."},
+  row:         {name:"Seated cable row",          count:[3,"10"],       art:"row",
+    cue:"Pull the handle to your belly, squeeze your shoulder blades, back stays tall."},
+  shoulderpress:{name:"Dumbbell shoulder press",  count:[3,"10"],       art:"shoulderpress",
+    cue:"Press from ear level to overhead, don't arch your lower back."},
+  rdl:         {name:"Romanian deadlift (RDL)",   count:[3,"10"],       art:"rdl",
+    cue:"Soft knees, push hips back, slide the dumbbells down your thighs, flat back."},
+  lunge:       {name:"Dumbbell lunges",           count:[3,"10 / leg"], art:"lunge",
+    cue:"Big step forward, back knee toward the floor, push up through the front heel."},
+  curl:        {name:"Dumbbell biceps curl",      count:[3,"12"],       art:"curl",
+    cue:"Elbows pinned to your sides, curl up, lower slowly — no swinging."},
+  hammer:      {name:"Hammer curl",               count:[3,"12"],       art:"hammer",
+    cue:"Like a curl, but palms face each other the whole time. Hits the thicker part of the arm."},
+  pushdown:    {name:"Triceps rope pushdown",     count:[3,"12"],       art:"pushdown",
+    cue:"Elbows glued to your sides, push the rope down and apart until arms are straight."},
+  overhead:    {name:"Overhead triceps extension",count:[3,"12"],       art:"overhead",
+    cue:"Both hands under one dumbbell, lower it behind your head, extend up."},
+  plank:       {name:"Plank",                     count:[3,"30 sec"],   art:"plank", noWeight:true,
+    cue:"Forearms down, body in one straight line, squeeze your abs — don't let hips sag."},
+};
+
+const DAYS = [
+  ["goblet","bench","incline","pulldown","curl","pushdown"],
+  ["legpress","row","rdl","pecdeck","hammer","overhead"],
+  ["lunge","bench","pulldown","shoulderpress","curl","pushdown","plank"],
+];
+const DAY_NOTES = [
+  "Chest pressing + arms. Start with squats while you're fresh.",
+  "Machine day — legs, back and the second half of your arm work.",
+  "Biggest day. Take your rests, finish with the plank.",
+];
+
+/* ============ state & storage ============ */
+const KEY = "cutbuild-v2";
+let state = { unit:"lb", weights:{}, sets:{}, history:[], lastDay:0, exHist:{}, bw:[] };
+let persistOK = true;
+let currentTab = 0;
+let saveTimer = null;
+
+function loadState(){
+  try{
+    localStorage.setItem("__t","1"); localStorage.removeItem("__t");
+    const r = localStorage.getItem(KEY);
+    if(r) state = Object.assign(state, JSON.parse(r));
+  }catch(e){ persistOK = false; }
+}
+function save(){
+  if(!persistOK) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch(e){ persistOK = false; renderSaveNote(); }
+  }, 200);
+}
+
+const todayISO = () => new Date().toISOString().slice(0,10);
+const pretty = iso => {
+  const [y,m,d] = iso.split("-").map(Number);
+  return new Date(y, m-1, d).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+};
+const num = v => { const n = parseFloat(String(v).replace(",",".")); return isNaN(n) ? null : n; };
+
+/* ============ workout rendering ============ */
+const $ = id => document.getElementById(id);
+function daySets(d){ if(!state.sets[d]) state.sets[d] = {}; return state.sets[d]; }
+
+function renderTabs(){
+  const suggested = state.history.length ? (state.lastDay % 3) : 0;
+  for(let i=0;i<3;i++){
+    const btn = $("tabbtn-"+i);
+    btn.setAttribute("aria-selected", i===currentTab ? "true":"false");
+    btn.classList.toggle("suggested", i===suggested);
+    const ss = daySets(i);
+    let done=0, total=0;
+    DAYS[i].forEach(id=>{ total+=EX[id].count[0]; done+=(ss[id]||[]).filter(Boolean).length; });
+    $("tabprog-"+i).textContent = done>0 ? `${done}/${total} sets` : "";
+  }
+  $("tabbtn-3").setAttribute("aria-selected", currentTab===3 ? "true":"false");
+}
+
+function renderList(){
+  const list = $("list");
+  list.innerHTML = "";
+  $("dayNote").textContent = DAY_NOTES[currentTab];
+  const ss = daySets(currentTab);
+
+  DAYS[currentTab].forEach((id, idx)=>{
+    const ex = EX[id];
+    if(!ss[id]) ss[id] = new Array(ex.count[0]).fill(false);
+    const card = document.createElement("section");
+    card.className = "card";
+    const yt = "https://www.youtube.com/results?search_query="
+             + encodeURIComponent(ex.name + " proper form");
+
+    card.innerHTML = `
+      <div class="ex-head">
+        <span class="ex-num mono">${String(idx+1).padStart(2,"0")}</span>
+        <span class="ex-name">${ex.name}</span>
+      </div>
+      <div class="ex-count mono">${ex.count[0]}<span class="x">×</span>${ex.count[1]}</div>
+      <div class="fig">${ART[ex.art]}</div>
+      <p class="cue">${ex.cue} <a href="${yt}" target="_blank" rel="noopener">Watch form ↗</a></p>
+      <div class="track">
+        <div class="bubbles" role="group" aria-label="Sets done for ${ex.name}"></div>
+        ${ex.noWeight ? "" : `
+        <label class="weight">
+          <input type="text" inputmode="decimal" placeholder="—" aria-label="Weight used for ${ex.name}"
+                 value="${state.weights[id] || ""}">
+          <button class="unit-btn" type="button" aria-label="Switch weight unit">${state.unit}</button>
+        </label>`}
+      </div>`;
+
+    const bubbles = card.querySelector(".bubbles");
+    ss[id].forEach((on, si)=>{
+      const b = document.createElement("button");
+      b.className = "bubble";
+      b.setAttribute("aria-pressed", on ? "true":"false");
+      b.textContent = on ? "✓" : si+1;
+      b.addEventListener("click", ()=>{
+        ss[id][si] = !ss[id][si];
+        b.setAttribute("aria-pressed", ss[id][si] ? "true":"false");
+        b.textContent = ss[id][si] ? "✓" : si+1;
+        if(ss[id][si]) startTimer(90);
+        renderTabs(); save();
+      });
+      bubbles.appendChild(b);
+    });
+
+    const wInput = card.querySelector(".weight input");
+    if(wInput){
+      wInput.addEventListener("input", ()=>{ state.weights[id] = wInput.value.trim(); save(); });
+    }
+    const uBtn = card.querySelector(".unit-btn");
+    if(uBtn){
+      uBtn.addEventListener("click", ()=>{
+        state.unit = state.unit === "lb" ? "kg" : "lb";
+        save(); renderList(); 
+      });
+    }
+    list.appendChild(card);
+  });
+  renderTabs();
+  renderQuickStats();
+}
+
+function renderQuickStats(){
+  const n = state.history.length;
+  const last = n ? state.history[n-1] : null;
+  $("quickStats").innerHTML = n
+    ? `<b>${n}</b> workout${n>1?"s":""} logged · last: <b>Day ${last.day}</b> — ${pretty(last.iso)}`
+    : `No workouts logged yet — tap the circles as you finish each set.`;
+}
+
+/* ============ finish workout ============ */
+$("finishBtn").addEventListener("click", ()=>{
+  const ss = daySets(currentTab);
+  let done=0, total=0;
+  DAYS[currentTab].forEach(id=>{ total+=EX[id].count[0]; done+=(ss[id]||[]).filter(Boolean).length; });
+  if(done===0){ toast("Tap the set circles first, then finish."); return; }
+
+  const iso = todayISO();
+  state.history.push({ iso, day: currentTab+1, done, total });
+  if(state.history.length>200) state.history = state.history.slice(-200);
+  state.lastDay = currentTab+1;
+
+  // log lifted weights into strength history (one point per exercise per day)
+  DAYS[currentTab].forEach(id=>{
+    const w = num(state.weights[id]);
+    if(w===null || EX[id].noWeight) return;
+    if(!state.exHist[id]) state.exHist[id] = [];
+    const h = state.exHist[id];
+    if(h.length && h[h.length-1].d === iso) h[h.length-1].w = w;
+    else h.push({d: iso, w});
+    if(h.length>100) state.exHist[id] = h.slice(-100);
+  });
+
+  state.sets[currentTab] = {};
+  save();
+  toast(`Day ${currentTab+1} saved — ${done}/${total} sets. Good work.`);
+  renderList();
+});
+
+/* ============ stats pane ============ */
+function spark(vals, w, h){
+  if(vals.length<2) return "";
+  const min=Math.min(...vals), max=Math.max(...vals), rng=(max-min)||1;
+  const pt = (v,i)=>[ (i/(vals.length-1))*(w-8)+4, h-5-((v-min)/rng)*(h-10) ];
+  const pts = vals.map((v,i)=>pt(v,i).join(",")).join(" ");
+  const [lx,ly] = pt(vals[vals.length-1], vals.length-1);
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">
+    <polyline points="${pts}" fill="none" stroke="#22303F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lx}" cy="${ly}" r="3.5" fill="#FFD84D" stroke="#22303F" stroke-width="1.5"/></svg>`;
+}
+
+function renderStatsPane(){
+  $("bwUnit").textContent = state.unit;
+
+  /* body weight */
+  const bw = state.bw;
+  if(!bw.length){
+    $("bwBody").innerHTML = `<p class="empty">Log your weight once or twice a week (same time of day). The trend over weeks is what matters, not day-to-day jumps.</p>`;
+  }else{
+    const first = bw[0].w, latest = bw[bw.length-1].w;
+    const diff = +(latest-first).toFixed(1);
+    const cls = diff<0 ? "down" : (diff>0 ? "up" : "");
+    const sign = diff>0 ? "+" : "";
+    const chart = bw.length>1
+      ? `<svg class="bw-chart" viewBox="0 0 320 84" preserveAspectRatio="none">${
+          spark(bw.slice(-24).map(e=>e.w), 320, 84).replace(/<\/?svg[^>]*>/g,"")
+        }</svg>`
+      : "";
+    $("bwBody").innerHTML = `
+      <div class="bw-now">
+        <span class="bw-num mono">${latest}</span>
+        <span class="mono" style="font-weight:700;color:var(--ink-soft)">${state.unit}</span>
+        ${diff!==0 ? `<span class="bw-delta ${cls}">${sign}${diff} ${state.unit} since ${pretty(bw[0].d)}</span>`:""}
+      </div>${chart}`;
+  }
+
+  /* strength */
+  const ids = Object.keys(state.exHist).filter(id=>state.exHist[id] && state.exHist[id].length);
+  if(!ids.length){
+    $("strBody").innerHTML = `<p class="empty">Type the weight you lift on each exercise card, then press "Finish workout" — your numbers will start collecting here so you can watch them climb.</p>`;
+  }else{
+    $("strBody").innerHTML = ids.map(id=>{
+      const h = state.exHist[id];
+      const first = h[0].w, latest = h[h.length-1].w;
+      const diff = +(latest-first).toFixed(1);
+      const chip = diff>0 ? `<span class="str-delta pos">▲ +${diff}</span>`
+                 : diff<0 ? `<span class="str-delta zero">▼ ${diff}</span>`
+                 : `<span class="str-delta zero">—</span>`;
+      return `<div class="str-row">
+        <span class="str-name">${EX[id].name}</span>
+        ${h.length>1 ? spark(h.map(e=>e.w), 64, 24) : ""}
+        <span class="str-vals mono">${first} → ${latest} ${state.unit}</span>
+        ${chip}
+      </div>`;
+    }).join("");
+  }
+
+  /* workout log */
+  const hist = state.history;
+  if(!hist.length){
+    $("logBody").innerHTML = `<p class="empty">Finished workouts will show up here.</p>`;
+  }else{
+    const weekAgo = Date.now() - 7*864e5;
+    const thisWeek = hist.filter(e=>new Date(e.iso).getTime() >= weekAgo).length;
+    const rows = hist.slice(-8).reverse().map(e=>
+      `<div class="log-row"><b>Day ${e.day}</b><span>${pretty(e.iso)}</span><span class="mono">${e.done}/${e.total} sets</span></div>`
+    ).join("");
+    $("logBody").innerHTML =
+      `<div class="log-row"><b>Total: ${hist.length}</b><span></span><span class="mono">${thisWeek}/3 this week</span></div>${rows}`;
+  }
+}
+
+$("bwAddBtn").addEventListener("click", ()=>{
+  const v = num($("bwInput").value);
+  if(v===null){ toast("Type a number first."); return; }
+  const iso = todayISO();
+  if(state.bw.length && state.bw[state.bw.length-1].d===iso) state.bw[state.bw.length-1].w = v;
+  else state.bw.push({d: iso, w: v});
+  if(state.bw.length>150) state.bw = state.bw.slice(-150);
+  $("bwInput").value = "";
+  save(); renderStatsPane(); toast("Logged.");
+});
+
+/* ============ export / import / reset ============ */
+$("exportBtn").addEventListener("click", async ()=>{
+  const json = JSON.stringify(state);
+  try{ await navigator.clipboard.writeText(json); toast("Backup copied — paste it somewhere safe (Notes)."); }
+  catch(e){ prompt("Copy this backup text:", json); }
+});
+$("importBtn").addEventListener("click", ()=>{
+  const raw = prompt("Paste your backup text:");
+  if(!raw) return;
+  try{
+    const s = JSON.parse(raw);
+    if(typeof s!=="object" || !s) throw 0;
+    state = Object.assign({ unit:"lb", weights:{}, sets:{}, history:[], lastDay:0, exHist:{}, bw:[] }, s);
+    save(); renderList(); renderStatsPane(); toast("Backup restored.");
+  }catch(e){ toast("That didn't look like a valid backup."); }
+});
+$("resetBtn").addEventListener("click", ()=>{
+  if(!confirm("Delete all saved sets, weights, body-weight and history?")) return;
+  state = { unit:state.unit, weights:{}, sets:{}, history:[], lastDay:0, exHist:{}, bw:[] };
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  renderList(); renderStatsPane(); toast("Cleared.");
+});
+
+function renderSaveNote(){
+  $("saveNote").textContent = persistOK
+    ? "Everything is saved on this iPhone only — nothing leaves your device. Deleting the app icon deletes the data, so export a backup now and then."
+    : "Heads up: saving is blocked (private browsing?). Progress will reset when you close this.";
+}
+
+/* ============ tabs ============ */
+[0,1,2,3].forEach(i=>{
+  $("tabbtn-"+i).addEventListener("click", ()=>{
+    currentTab = i;
+    const stats = (i===3);
+    $("workoutPane").hidden = stats;
+    $("statsPane").hidden = !stats;
+    if(stats) renderStatsPane(); else renderList();
+    renderTabs();
+    window.scrollTo({top:0});
+  });
+});
+
+/* ============ rest timer ============ */
+let tInt=null, tLeft=0, tTotal=0;
+function startTimer(sec){
+  clearInterval(tInt);
+  tLeft = sec; tTotal = sec;
+  $("timer").classList.add("on");
+  tickTimer();
+  tInt = setInterval(()=>{
+    tLeft--;
+    if(tLeft<=0){ stopTimer(); toast("Rest done — next set."); return; }
+    tickTimer();
+  },1000);
+}
+function tickTimer(){
+  const m = Math.floor(tLeft/60), s = String(tLeft%60).padStart(2,"0");
+  $("timerTime").textContent = `${m}:${s}`;
+  $("timerBar").style.width = (tLeft/tTotal*100)+"%";
+}
+function stopTimer(){ clearInterval(tInt); $("timer").classList.remove("on"); }
+$("timer").addEventListener("click", stopTimer);
+
+/* ============ toast ============ */
+let toastTimer=null;
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"), 2400);
+}
+
+/* ============ init ============ */
+loadState();
+currentTab = state.history.length ? (state.lastDay % 3) : 0;
+renderList();
+renderSaveNote();
+if("serviceWorker" in navigator && location.protocol==="https:"){
+  navigator.serviceWorker.register("./sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
